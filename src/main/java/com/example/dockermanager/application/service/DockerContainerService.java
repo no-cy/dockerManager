@@ -1,7 +1,7 @@
 package com.example.dockermanager.application.service;
 
-import com.example.dockermanager.application.dto.CreateDockerContainerDto;
-import com.example.dockermanager.application.dto.PortMappingDto;
+import com.example.dockermanager.application.docker.dto.CreateDockerContainerDto;
+import com.example.dockermanager.application.docker.dto.PortMappingDto;
 import com.example.dockermanager.common.exception.DataAlreadyExistsException;
 import com.example.dockermanager.infrastructure.db.jpa.ContainerPortRepository;
 import com.example.dockermanager.infrastructure.db.jpa.ContainerRepository;
