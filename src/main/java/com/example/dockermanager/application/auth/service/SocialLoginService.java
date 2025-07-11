@@ -1,7 +1,7 @@
 package com.example.dockermanager.application.auth.service;
 
-import com.example.dockermanager.presentation.auth.dto.response.UserLoginDto;
+import com.example.dockermanager.application.auth.dto.SocialUserInfo;
 
 public interface SocialLoginService {
-    UserLoginDto login(String code);
+    SocialUserInfo login(String code);
 }

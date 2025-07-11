@@ -1,8 +1,8 @@
 package com.example.dockermanager.infrastructure.oauth;
 
+import com.example.dockermanager.application.auth.dto.SocialUserInfo;
 import com.example.dockermanager.application.auth.service.SocialLoginService;
 import com.example.dockermanager.infrastructure.oauth.dto.GitLabUserResponse;
-import com.example.dockermanager.presentation.auth.dto.response.UserLoginDto;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -38,7 +38,7 @@ public class GitLabLoginService implements SocialLoginService {
     String userInfoUri;
 
     @Override
-    public UserLoginDto login(String code) {
+    public SocialUserInfo login(String code) {
         // 1. Access Token 요청
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("client_id", clientId);
@@ -76,7 +76,7 @@ public class GitLabLoginService implements SocialLoginService {
 
         GitLabUserResponse user = userResponse.getBody();
 
-        return UserLoginDto.builder()
+        return SocialUserInfo.builder()
                 .name(user.getName())
                 .email(user.getEmail())
                 .build();
