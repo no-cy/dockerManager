@@ -1,4 +1,4 @@
-package com.example.dockermanager.application.dto;
+package com.example.dockermanager.application.docker.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
@@ -14,10 +14,14 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 public class CreateDockerContainerDto {
+    @JsonProperty("user_id")
+    Long userId;
+
     String image;
 
     String tag;
 
+    @JsonProperty("container_name")
     String containerName;
 
     @JsonProperty("cmds")
