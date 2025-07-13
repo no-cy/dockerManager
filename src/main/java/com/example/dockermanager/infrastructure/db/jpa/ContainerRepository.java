@@ -4,8 +4,12 @@ import com.example.dockermanager.domain.container.entity.Container;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import java.util.List;
 
 public interface ContainerRepository extends JpaRepository<Container, String> {
     @Query("SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END FROM Container c WHERE c.containerName = :name AND c.status <> 'deleted' and c.status IS NOT NULL")
     Boolean existsByContainerName(@Param("name") String name);
+
+    @Query("SELECT c FROM Container c WHERE c.userId = :userId")
+    List<Container> findByUserId(Long userId);
 }

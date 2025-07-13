@@ -39,4 +39,7 @@ public class Container {
 
     @Column(name = "last_check_time")
     LocalDateTime lastCheckTime;
+
+    @Column
+    Long userId;
 }
