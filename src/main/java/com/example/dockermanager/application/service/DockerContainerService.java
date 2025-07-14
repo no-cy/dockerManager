@@ -2,18 +2,22 @@ package com.example.dockermanager.application.service;
 
 import com.example.dockermanager.application.docker.dto.ContainerResponseDto;
 import com.example.dockermanager.application.docker.dto.CreateDockerContainerDto;
+import com.example.dockermanager.application.docker.dto.GoModuleRequestDto;
 import com.example.dockermanager.application.docker.dto.PortMappingDto;
 import com.example.dockermanager.common.exception.DataAlreadyExistsException;
+import com.example.dockermanager.common.util.docker.ContainerTimeUtils;
 import com.example.dockermanager.domain.container.entity.Container;
 import com.example.dockermanager.infrastructure.db.jpa.ContainerPortRepository;
 import com.example.dockermanager.infrastructure.db.jpa.ContainerRepository;
 import com.example.dockermanager.infrastructure.http.GoModuleClient;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DockerContainerService {
@@ -38,7 +42,10 @@ public class DockerContainerService {
             throw new DataAlreadyExistsException("이미 다음 포트가 할당되어 있습니다: " + ports);
         }
 
-        return goModuleClient.sendContainerRequest(dto);
+        Long ttl = ContainerTimeUtils.calculateInSeconds(dto.getScheduledTerminationAt());
+        GoModuleRequestDto requestDto = GoModuleRequestDto.from(dto, ttl);
+
+        return goModuleClient.sendContainerRequest(requestDto);
     }
 
     public List<ContainerResponseDto> getContainersByUserId(Long userId) {

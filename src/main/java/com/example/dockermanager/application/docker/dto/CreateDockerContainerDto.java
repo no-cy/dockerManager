@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Setter
@@ -30,5 +31,6 @@ public class CreateDockerContainerDto {
     @JsonProperty("ports")
     List<PortMappingDto> portMappingDtoList;
 
-    Integer ttl;
+    @JsonProperty("scheduled_termination_at")
+    LocalDateTime scheduledTerminationAt; // 사용자가 지정한 컨테이너 종료 시간
 }
