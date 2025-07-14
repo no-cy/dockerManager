@@ -1,6 +1,7 @@
 package com.example.dockermanager.application.dockerhub.service;
 
 import com.example.dockermanager.configuration.DockerHubConfig;
+import com.example.dockermanager.infrastructure.token.DockerHubTokenManager;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
@@ -22,11 +23,19 @@ public class DockerHubService {
     DockerHubConfig dockerHubConfig;
     ObjectMapper objectMapper;
     RestTemplate restTemplate;
+    DockerHubTokenManager tokenManager;
 
     public List<String> getPrivateRepositories() {
         String username = dockerHubConfig.getUsername();
-        String pat = dockerHubConfig.getToken();
-        String jwtToken = loginToDockerHub(username, pat);
+        String jwtToken;
+
+        if (tokenManager.isETokenValid()) {
+            jwtToken = tokenManager.getToken();
+        } else {
+            String pat = dockerHubConfig.getToken();
+            jwtToken = loginToDockerHub(username, pat);
+            tokenManager.storeToken(jwtToken, 18000); // 토큰 5시간 유효
+        }
 
         String url = "https://hub.docker.com/v2/repositories/" + dockerHubConfig.getUsername() + "/?page_size=100";
 
