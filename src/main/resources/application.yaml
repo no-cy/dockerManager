@@ -1,0 +1,29 @@
+spring:
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${URL}
+    username: ${USERNAME}
+    password: ${PASSWORD}
+  gitlab:
+    api-url: ${GITLAB_API_URL}
+    token: ${GITLAB_API_TOKEN}
+
+oauth:
+  gitlab:
+    client-id: ${GITLAB_CLIENT_ID}
+    client-secret: ${GITLAB_CLIENT_SECRET}
+    redirect-uri: ${GITLAB_REDIRECT_URI}
+    token-uri: ${GITLAB_TOKEN_URI}
+    user-info-uri: ${GITLAB_USER_INFO_URI}
+
+dockerhub:
+  username: ${DOCKER_HUB_USERNAME}
+  token: ${DOCKER_HUB_TOKEN}
+
+dockmgrcore:
+  dockmgr-core-url: ${DOCKMGR_CORE_URL}
+
+auth:
+  redirect-uri: ${AUTH_REDIRECT-URI}

@@ -79,6 +79,7 @@ public class GitLabLoginService implements SocialLoginService {
         return SocialUserInfo.builder()
                 .name(user.getName())
                 .email(user.getEmail())
+                .accessToken(accessToken)
                 .build();
     }
 }

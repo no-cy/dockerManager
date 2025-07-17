@@ -13,4 +13,5 @@ import lombok.experimental.FieldDefaults;
 public class SocialUserInfo {
     String name;
     String email;
+    String accessToken;
 }
