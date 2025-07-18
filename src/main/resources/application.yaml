@@ -9,6 +9,11 @@ spring:
   gitlab:
     api-url: ${GITLAB_API_URL}
     token: ${GITLAB_API_TOKEN}
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+#    password: ${REDIS_PASSWORD}
 
 oauth:
   gitlab:

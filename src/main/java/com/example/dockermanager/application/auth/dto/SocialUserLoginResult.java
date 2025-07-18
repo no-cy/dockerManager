@@ -13,5 +13,6 @@ public class SocialUserLoginResult {
     String nickname;
     String image;
     String socialLoginInfo;
+    String sessionId;
     boolean joinStatus;
 }

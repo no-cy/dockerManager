@@ -21,11 +21,11 @@ public class UserService {
         Optional<User> user = userRepository.findByEmail(userInfo.getEmail());
 
         if (user.isPresent()) {
-            return user.get().getId();
+            return user.get().getUserId();
         } else {
             User newUser = new User(userInfo.getName(), userInfo.getEmail());
             userRepository.save(newUser);
-            return newUser.getId();
+            return newUser.getUserId();
         }
     }
 }

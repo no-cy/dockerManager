@@ -35,6 +35,7 @@ public class SocialLoginController {
                 .queryParam("token", loginResult.getAccessToken())
                 .queryParam("username", URLEncoder.encode(loginResult.getName(), StandardCharsets.UTF_8))
                 .queryParam("email", loginResult.getEmail())
+                .queryParam("sessionId", loginResult.getSessionId())
                 .build(false).
                 toUriString();
 
