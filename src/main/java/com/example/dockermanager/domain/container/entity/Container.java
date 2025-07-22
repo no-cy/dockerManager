@@ -1,5 +1,6 @@
 package com.example.dockermanager.domain.container.entity;
 
+import com.example.dockermanager.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -14,7 +15,8 @@ import java.time.LocalDateTime;
 public class Container {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    String id;
+    @Column(name = "id")
+    String containerId;
 
     @Column
     String image;
@@ -40,6 +42,11 @@ public class Container {
     @Column(name = "last_check_time")
     LocalDateTime lastCheckTime;
 
-    @Column
-    Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    User user;
+
+    public void applyTtl(Long ttl) {
+        this.ttl = ttl;
+    }
 }

@@ -15,8 +15,8 @@ import lombok.experimental.FieldDefaults;
 public class User {
 
     @Id
-    @Column
-    long id;
+    @Column(name = "id")
+    long userId;
 
     @Column
     String name;

@@ -11,4 +11,9 @@ public class GlobalExceptionHandler {
     public ResponseDto<String> handleDataAlreadyExists(DataAlreadyExistsException ex) {
         return ResponseDto.of(HttpStatus.NO_CONTENT, ex.getMessage(), null);
     }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseDto<String> handleNotFound(NotFoundException ex) {
+        return ResponseDto.of(HttpStatus.NOT_FOUND, ex.getMessage(), null);
+    }
 }
