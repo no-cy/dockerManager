@@ -38,10 +38,10 @@ public class DockerContainerService {
                 .map(PortMappingDto::getHostPort)
                 .toList();
 
-        List<String> duplicatePorts = containerPortRepository.findAllByContainerPortIn(requestedHostPorts);
-        if (!duplicatePorts.isEmpty()) {
-            String ports = String.join(", ", duplicatePorts);
-            throw new DataAlreadyExistsException("이미 다음 포트가 할당되어 있습니다: " + ports);
+        for (String requestedHostPort : requestedHostPorts) {
+            if (containerPortRepository.existsByContainerPort(requestedHostPort)) {
+                throw new DataAlreadyExistsException("이미 다음 포트가 할당되어 있습니다: " + requestedHostPort);
+            }
         }
 
         Long ttl = ContainerTimeUtils.calculateInSeconds(dto.getScheduledTerminationAt());
