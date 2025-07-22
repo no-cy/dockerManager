@@ -22,7 +22,7 @@ public class ContainerResponseDto {
 
     public static ContainerResponseDto from(Container container) {
         return new ContainerResponseDto(
-                container.getId(),
+                container.getContainerId(),
                 container.getImage(),
                 container.getTag(),
                 container.getTtl(),
