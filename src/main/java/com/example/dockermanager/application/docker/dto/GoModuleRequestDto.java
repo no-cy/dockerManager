@@ -29,9 +29,9 @@ public class GoModuleRequestDto {
 
     Long ttl;
 
-    public static GoModuleRequestDto from(CreateDockerContainerDto dto, Long ttl) {
+    public static GoModuleRequestDto from(CreateDockerContainerDto dto, Long userId, Long ttl) {
         return new GoModuleRequestDto(
-                dto.getUserId(),
+                userId,
                 dto.getImage(),
                 dto.getTag(),
                 dto.getContainerName(),

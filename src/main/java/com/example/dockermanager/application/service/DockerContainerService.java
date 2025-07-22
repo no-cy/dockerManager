@@ -28,7 +28,7 @@ public class DockerContainerService {
     private final ContainerPortRepository containerPortRepository;
     private final ContainerMapper containerMapper;
 
-    public String createContainer(CreateDockerContainerDto dto) {
+    public String createContainer(Long userId, CreateDockerContainerDto dto) {
 
         if (containerRepository.existsByContainerName(dto.getContainerName())) {
             throw new DataAlreadyExistsException("이미 " + dto.getContainerName() + " 컨테이너가 생성되어 있습니다.");
@@ -45,13 +45,13 @@ public class DockerContainerService {
         }
 
         Long ttl = ContainerTimeUtils.calculateInSeconds(dto.getScheduledTerminationAt());
-        GoModuleRequestDto requestDto = GoModuleRequestDto.from(dto, ttl);
+        GoModuleRequestDto requestDto = GoModuleRequestDto.from(dto, userId, ttl);
 
         return goModuleClient.sendContainerRequest(requestDto);
     }
 
     public List<ContainerResponseDto> getContainersByUserId(Long userId) {
-        List<Container> containers = containerRepository.findByUserId(userId);
+        List<Container> containers = containerRepository.findByUser_UserId(userId);
         return containers.stream()
                 .map(ContainerResponseDto::from)
                 .collect(Collectors.toList());
