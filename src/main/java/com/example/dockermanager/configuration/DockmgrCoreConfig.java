@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "dockmgrcore")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class DockMgrHttpConfig {
-    String dockmgrCoreUrl;
+public class DockmgrCoreConfig {
+    String protocol;
+    String host;
+    String port;
 }

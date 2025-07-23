@@ -8,7 +8,10 @@ import com.example.dockermanager.domain.container.entity.Container;
 import com.example.dockermanager.infrastructure.container.ContainerMapper;
 import com.example.dockermanager.infrastructure.db.jpa.ContainerPortRepository;
 import com.example.dockermanager.infrastructure.db.jpa.ContainerRepository;
-import com.example.dockermanager.infrastructure.http.GoModuleClient;
+import com.example.dockermanager.infrastructure.dockmgrcore.GoModuleBuilder;
+import com.example.dockermanager.infrastructure.dockmgrcore.GoModuleClient;
+import com.example.dockermanager.infrastructure.dockmgrcore.enums.ContainerCommand;
+import com.example.dockermanager.infrastructure.dockmgrcore.enums.ContainerMethodType;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +30,7 @@ public class DockerContainerService {
     private final ContainerRepository containerRepository;
     private final ContainerPortRepository containerPortRepository;
     private final ContainerMapper containerMapper;
+    private final GoModuleBuilder goModuleBuilder;
 
     public String createContainer(Long userId, CreateDockerContainerDto dto) {
 
@@ -45,9 +49,10 @@ public class DockerContainerService {
         }
 
         Long ttl = ContainerTimeUtils.calculateInSeconds(dto.getScheduledTerminationAt());
-        GoModuleRequestDto requestDto = GoModuleRequestDto.from(dto, userId, ttl);
+        GoContainerCreateRequestDto requestDto = GoContainerCreateRequestDto.from(dto, userId, ttl);
+        String url = goModuleBuilder.getUrl(ContainerMethodType.CREATE);
 
-        return goModuleClient.sendContainerRequest(requestDto);
+        return goModuleClient.sendRequest(url, requestDto, String.class);
     }
 
     public List<ContainerResponseDto> getContainersByUserId(Long userId) {
@@ -72,5 +77,25 @@ public class DockerContainerService {
         }
 
         return "컨테이너를 수정하는데 성공하였습니다.";
+    }
+
+    public String changeContainerStatus(Long userId, ContainerStatusUpdateDto dto) {
+        String cmd = dto.getCmd();
+        String containerId = dto.getContainerId();
+
+        // status 값이 stop(exited)일 경우, 해당 컨테이너가 running 상태인지 확인.
+        // start 일 경우, 해당 컨테이너가 stop 중인지 확인.
+        ContainerCommand containerCommand = ContainerCommand.from(cmd);
+        Boolean result = containerRepository.existsByContainerIdAndStatus(containerId, containerCommand.getRequiredStatus());
+        if (!result) {
+            throw new NotFoundException(containerCommand.getErrorMessage());
+        }
+
+        String url = goModuleBuilder.getUrl(containerCommand.getMethodType());
+
+        GoContainerUpdateStatusRequestDto requestDto = GoContainerUpdateStatusRequestDto.from(dto);
+
+        // dockmgr-core 에게 데이터 전달.
+        return goModuleClient.sendRequest(url, requestDto, String.class);
     }
 }

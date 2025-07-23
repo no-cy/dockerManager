@@ -18,4 +18,7 @@ public interface ContainerRepository extends JpaRepository<Container, String> {
 
     @Query("SELECT c FROM Container c where c.user.userId = :userId AND c.containerId = :containerId AND c.status = 'running'")
     Optional<Container> findByUserIdAndContainerIdAndStatusRunning(Long userId, String containerId);
+
+    @Query("SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END FROM Container c WHERE c.containerId = :containerId AND c.status = :status")
+    Boolean existsByContainerIdAndStatus(String containerId, String status);
 }

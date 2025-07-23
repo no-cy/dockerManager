@@ -1,6 +1,7 @@
 package com.example.dockermanager.presentation.docker.controller;
 
 import com.example.dockermanager.application.docker.dto.ContainerResponseDto;
+import com.example.dockermanager.application.docker.dto.ContainerStatusUpdateDto;
 import com.example.dockermanager.application.docker.dto.UpdateContainerDto;
 import com.example.dockermanager.application.service.DockerContainerService;
 import com.example.dockermanager.common.dto.ResponseDto;
@@ -36,5 +37,10 @@ public class DockerController {
     @PatchMapping("/containers")
     public ResponseDto<String> updateContainerInfo(@RequestAttribute("userId") Long userId, @RequestBody UpdateContainerDto updateContainerDto) {
         return ResponseDto.of(HttpStatus.OK, "컨테이너 정보를 수정하는데 성공하였습니다.", containerCreateService.updateContainer(userId, updateContainerDto));
+    }
+
+    @PostMapping("/containers/status")
+    public ResponseDto<String> updateContainerStatus(@RequestAttribute("userId") Long userId, @RequestBody ContainerStatusUpdateDto containerStatusUpdateDto) {
+        return ResponseDto.of(HttpStatus.OK, "컨테이너 정보를 수정하는데 성공하였습니다.", containerCreateService.changeContainerStatus(userId, containerStatusUpdateDto));
     }
 }

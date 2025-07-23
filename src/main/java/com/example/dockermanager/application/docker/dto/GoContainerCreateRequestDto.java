@@ -10,7 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class GoModuleRequestDto {
+public class GoContainerCreateRequestDto {
     @JsonProperty("user_id")
     Long userId;
 
@@ -29,8 +29,8 @@ public class GoModuleRequestDto {
 
     Long ttl;
 
-    public static GoModuleRequestDto from(CreateDockerContainerDto dto, Long userId, Long ttl) {
-        return new GoModuleRequestDto(
+    public static GoContainerCreateRequestDto from(CreateDockerContainerDto dto, Long userId, Long ttl) {
+        return new GoContainerCreateRequestDto(
                 userId,
                 dto.getImage(),
                 dto.getTag(),
