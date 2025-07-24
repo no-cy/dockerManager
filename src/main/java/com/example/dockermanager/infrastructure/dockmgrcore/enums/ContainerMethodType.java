@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public enum ContainerMethodType {
     CREATE("/v1/container/create"),
+    DELETE("/v1/container/delete"),
     STOP("/v1/container/stop"),
     START("/v1/container/start");
 

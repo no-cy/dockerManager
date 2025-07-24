@@ -10,7 +10,7 @@ import com.example.dockermanager.infrastructure.db.jpa.ContainerPortRepository;
 import com.example.dockermanager.infrastructure.db.jpa.ContainerRepository;
 import com.example.dockermanager.infrastructure.dockmgrcore.GoModuleBuilder;
 import com.example.dockermanager.infrastructure.dockmgrcore.GoModuleClient;
-import com.example.dockermanager.infrastructure.dockmgrcore.enums.ContainerCommand;
+import com.example.dockermanager.application.common.container.ContainerCommand;
 import com.example.dockermanager.infrastructure.dockmgrcore.enums.ContainerMethodType;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -79,21 +79,15 @@ public class DockerContainerService {
         return "컨테이너를 수정하는데 성공하였습니다.";
     }
 
-    public String changeContainerStatus(Long userId, ContainerStatusUpdateDto dto) {
-        String cmd = dto.getCmd();
-        String containerId = dto.getContainerId();
-
-        // status 값이 stop(exited)일 경우, 해당 컨테이너가 running 상태인지 확인.
-        // start 일 경우, 해당 컨테이너가 stop 중인지 확인.
-        ContainerCommand containerCommand = ContainerCommand.from(cmd);
-        Boolean result = containerRepository.existsByContainerIdAndStatus(containerId, containerCommand.getRequiredStatus());
+    public String changeContainerStatus(Long userId, String containerId, ContainerCommand cmd, ContainerStatusUpdateDto dto) {
+        Boolean result = containerRepository.existsByUserIdAndContainerIdAndStatus(userId, containerId, cmd.getRequiredStatus());
         if (!result) {
-            throw new NotFoundException(containerCommand.getErrorMessage());
+            throw new NotFoundException(cmd.getErrorMessage());
         }
 
-        String url = goModuleBuilder.getUrl(containerCommand.getMethodType());
+        String url = goModuleBuilder.getUrl(cmd.getMethodType());
 
-        GoContainerUpdateStatusRequestDto requestDto = GoContainerUpdateStatusRequestDto.from(dto);
+        GoContainerUpdateStatusRequestDto requestDto = GoContainerUpdateStatusRequestDto.from(containerId, dto);
 
         // dockmgr-core 에게 데이터 전달.
         return goModuleClient.sendRequest(url, requestDto, String.class);

@@ -13,7 +13,7 @@ public class GoContainerUpdateStatusRequestDto {
     @JsonProperty("container_id")
     String containerId;
 
-    public static GoContainerUpdateStatusRequestDto from(ContainerStatusUpdateDto dto) {
-        return new GoContainerUpdateStatusRequestDto(dto.getContainerId());
+    public static GoContainerUpdateStatusRequestDto from(String containerId, ContainerStatusUpdateDto dto) {
+        return new GoContainerUpdateStatusRequestDto(containerId);
     }
 }
