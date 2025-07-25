@@ -1,6 +1,8 @@
 package com.example.dockermanager.application.dockerhub.service;
 
 import com.example.dockermanager.configuration.DockerHubConfig;
+import com.example.dockermanager.infrastructure.http.HttpRequestFactory;
+import com.example.dockermanager.infrastructure.http.HttpResponseFactory;
 import com.example.dockermanager.infrastructure.token.DockerHubTokenManager;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,7 +10,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -27,6 +28,8 @@ public class DockerHubService {
     ObjectMapper objectMapper;
     RestTemplate restTemplate;
     DockerHubTokenManager tokenManager;
+    HttpRequestFactory httpRequestFactory;
+    HttpResponseFactory httpResponseFactory;
 
     public Map<String, List<String>> getPrivateRepositories() {
         String username = dockerHubConfig.getUsername();
@@ -42,25 +45,13 @@ public class DockerHubService {
 
         String url = "https://hub.docker.com/v2/repositories/" + dockerHubConfig.getUsername() + "/?page_size=100";
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "JWT " + jwtToken);
-        //headers.setBasicAuth(dockerHubConfig.getUsername(), dockerHubConfig.getToken());
+        HttpHeaders headers = httpRequestFactory.jwtHeaders(jwtToken);
 
-        HttpEntity<Void> request = new HttpEntity<>(headers);
+        HttpEntity<Void> request = httpRequestFactory.withoutBody(headers);
 
-        ResponseEntity<Map<String, Object>> response =
-                restTemplate.exchange(url, HttpMethod.GET, request, new ParameterizedTypeReference<>() {});
-
-        if (response.getStatusCode() != HttpStatus.OK) {
-            throw new IllegalStateException("Docker API 호출 실패: " + response.getStatusCode());
-        }
-
-        Object rawResults = response.getBody().get("results");
-
-        List<Map<String, Object>> results = objectMapper.convertValue(
-                rawResults,
-                new TypeReference<>() {}
-        );
+        Map<String, Object> body = httpResponseFactory.exchangeForMap(url, HttpMethod.GET, request);
+        Object rawResults = httpResponseFactory.extractField(body, "results", url);
+        List<Map<String, Object>> results = objectMapper.convertValue(rawResults, new TypeReference<>() {});
 
         HashMap<String, List<String>> repoMap = new HashMap<>();
 
@@ -80,27 +71,15 @@ public class DockerHubService {
     public List<String> getRepoTags(String repoName, String jwtToken) {
         String url = "https://hub.docker.com/v2/repositories/" + dockerHubConfig.getUsername() + "/" + repoName + "/tags?page_size=100";
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "JWT " + jwtToken);
+        HttpHeaders headers = httpRequestFactory.jwtHeaders(jwtToken);
 
-        HttpEntity<Void> request = new HttpEntity<>(headers);
+        HttpEntity<Void> request = httpRequestFactory.withoutBody(headers);
 
-        ResponseEntity<Map<String, Object>> response =
-                restTemplate.exchange(url, HttpMethod.GET, request, new ParameterizedTypeReference<>() {});
-
-        if (response.getStatusCode() != HttpStatus.OK) {
-            throw new IllegalStateException("Docker API 호출 실패: " + response.getStatusCode());
-        }
-
-        Object rawResults = response.getBody().get("results");
-
-        List<Map<String, Object>> results = objectMapper.convertValue(
-                rawResults,
-                new TypeReference<>() {}
-        );
+        Map<String, Object> body = httpResponseFactory.exchangeForMap(url, HttpMethod.GET, request);
+        Object rawResults = httpResponseFactory.extractField(body, "results", url);
+        List<Map<String, Object>> results = objectMapper.convertValue(rawResults, new TypeReference<>() {});
 
         ArrayList<String> tagList = new ArrayList<>();
-
         // 해당 repo의 tag 목록을 가져옴
         for (Map<String, Object> tag : results) {
             tagList.add((String) tag.get("name"));
@@ -117,17 +96,10 @@ public class DockerHubService {
                 "password", pat
         );
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpHeaders headers = httpRequestFactory.jsonHeaders();
+        HttpEntity<Map<String, String>> request = httpRequestFactory.withBody(body, headers);
 
-        HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
-
-        ResponseEntity<Map> response = restTemplate.postForEntity(loginUrl, request, Map.class);
-
-        if (response.getStatusCode() != HttpStatus.OK || !response.getBody().containsKey("token")) {
-            throw new IllegalStateException("DockerHub 로그인 실패: " + response.getStatusCode());
-        }
-
-        return (String) response.getBody().get("token");
+        Map<String, Object> response = httpResponseFactory.postForMap(loginUrl, request);
+        return (String) httpResponseFactory.extractField(response, "token", loginUrl);
     }
 }

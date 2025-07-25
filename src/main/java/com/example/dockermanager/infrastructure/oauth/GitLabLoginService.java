@@ -2,6 +2,8 @@ package com.example.dockermanager.infrastructure.oauth;
 
 import com.example.dockermanager.application.auth.dto.SocialUserInfo;
 import com.example.dockermanager.application.auth.service.SocialLoginService;
+import com.example.dockermanager.infrastructure.http.HttpRequestFactory;
+import com.example.dockermanager.infrastructure.http.HttpResponseFactory;
 import com.example.dockermanager.infrastructure.oauth.dto.GitLabUserResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +13,6 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 
@@ -20,8 +21,9 @@ import java.util.Map;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class GitLabLoginService implements SocialLoginService {
 
-    final RestTemplate restTemplate = new RestTemplate();
-
+    final HttpRequestFactory httpRequestFactory;
+    final HttpResponseFactory httpResponseFactory;
+    
     @Value("${oauth.gitlab.client-id}")
     String clientId;
 
@@ -47,34 +49,19 @@ public class GitLabLoginService implements SocialLoginService {
         params.add("grant_type", "authorization_code");
         params.add("redirect_uri", redirectUri);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        HttpHeaders headers = httpRequestFactory.formUrlEncodedHeaders();
+        HttpEntity<MultiValueMap<String, String>> tokenRequest = httpRequestFactory.withBody(params, headers);
 
-        HttpEntity<MultiValueMap<String, String>> tokenRequest = new HttpEntity<>(params, headers);
+        Map<String, Object> body = httpResponseFactory.postForMap(tokenUri, tokenRequest);
 
-        ResponseEntity<Map> tokenResponse = restTemplate.exchange(
-                tokenUri,
-                HttpMethod.POST,
-                tokenRequest,
-                Map.class
-        );
-
-        String accessToken = (String) tokenResponse.getBody().get("access_token");
+        String accessToken = (String) httpResponseFactory.extractField(body, "access_token", tokenUri);
 
         // 2. 사용자 정보 요청
-        HttpHeaders userHeaders = new HttpHeaders();
-        userHeaders.setBearerAuth(accessToken);
+        HttpHeaders userHeaders = httpRequestFactory.bearerHeaders(accessToken);
+        HttpEntity<Void> userRequest = httpRequestFactory.withoutBody(userHeaders);
+        // HttpEntity<Object> userRequest = new HttpEntity<>(userHeaders);
 
-        HttpEntity<Object> userRequest = new HttpEntity<>(userHeaders);
-
-        ResponseEntity<GitLabUserResponse> userResponse = restTemplate.exchange(
-                userInfoUri,
-                HttpMethod.GET,
-                userRequest,
-                GitLabUserResponse.class
-        );
-
-        GitLabUserResponse user = userResponse.getBody();
+        GitLabUserResponse user = httpResponseFactory.exchangeForObject(userInfoUri, HttpMethod.GET, userRequest, GitLabUserResponse.class);
 
         return SocialUserInfo.builder()
                 .name(user.getName())
