@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,7 +21,7 @@ public class DockerHubController {
     DockerHubService dockerHubService;
 
     @GetMapping("/repos")
-    public ResponseDto<List<String>> getPrivateRepos() {
+    public ResponseDto<Map<String, List<String>>> getPrivateRepos() {
         return ResponseDto.of(HttpStatus.OK, "Docker Hub에서 이미지를 조회하는데 성공하였습니다.", dockerHubService.getPrivateRepositories());
     }
 }
